@@ -35,6 +35,8 @@ BTC_MIN_CONF = '2',
 LTC_MIN_CONF = '4'
 } = process.env;
 
+const PREFIX = '!';
+
 const client = new Client({
 intents: [
 GatewayIntentBits.Guilds,
@@ -54,6 +56,57 @@ client.once('ready', () => {
 console.log(`Jace online as ${client.user.tag}`);
 if (BTC_ADDRESS || LTC_ADDRESS) {
 setInterval(pollCryptoDeposits, 60_000);
+}
+});
+
+// ---------------- PREFIX COMMANDS ----------------
+
+client.on('messageCreate', async (message) => {
+if (message.author.bot) return;
+if (!message.content.startsWith(PREFIX)) return;
+
+const args = message.content.slice(PREFIX.length).trim().split(/ +/);
+const cmd = args.shift()?.toLowerCase();
+
+try {
+
+if (cmd === 'ping') {
+return message.reply('Pong!');
+}
+
+// !deal (basic version)
+if (cmd === 'deal') {
+return message.reply('Use /deal (slash command) for full setup.');
+}
+
+// !release
+if (cmd === 'release') {
+return message.reply('Use /release in the deal channel.');
+}
+
+// !cancel
+if (cmd === 'cancel') {
+return message.reply('Use /cancel in the deal channel.');
+}
+
+// !dispute
+if (cmd === 'dispute') {
+return message.reply('Use /dispute in the deal channel.');
+}
+
+// !status
+if (cmd === 'status') {
+return message.reply('Use /status in the deal channel.');
+}
+
+// !close
+if (cmd === 'close') {
+return message.reply('Use /close (staff only) in the channel.');
+}
+
+} catch (e) {
+console.error(e);
+message.reply(`Error: ${e.message}`);
 }
 });
 
@@ -77,6 +130,8 @@ return i.followUp({ content: `Error: ${e.message}`, ephemeral: true });
 return i.reply({ content: `Error: ${e.message}`, ephemeral: true });
 }
 });
+
+// ---------------- DEAL LOGIC ----------------
 
 async function openDeal(i) {
 const partner = i.options.getUser('partner', true);
@@ -150,9 +205,7 @@ now: Date.now()
 const embed = new EmbedBuilder()
 .setTitle(`Deal - ${mode.toUpperCase()}`)
 .setColor(mode === 'auto' ? 0x22c55e : 0x3b82f6)
-.setDescription(
-`Buyer: <@${buyer.id}>\nSeller: <@${seller.id}>`
-);
+.setDescription(`Buyer: <@${buyer.id}>\nSeller: <@${seller.id}>`);
 
 await channel.send({
 content: `<@${buyer.id}> <@${seller.id}>`,
@@ -162,7 +215,7 @@ embeds: [embed]
 await i.editReply({ content: `Created: ${channel}` });
 }
 
-// ---------------- DEAL HELPERS ----------------
+// ---------------- HELPERS ----------------
 
 async function getDealOrFail(i) {
 const deal = getDealByChannel.get(i.channelId);
@@ -246,7 +299,7 @@ await i.reply('Closing...');
 setTimeout(() => i.channel.delete().catch(() => {}), 3000);
 }
 
-// ---------------- CRYPTO POLLING ----------------
+// ---------------- CRYPTO ----------------
 
 async function pollCryptoDeposits() {
 const deals = listOpenCryptoDeals.all().filter(d => d.mode === 'auto');
@@ -266,7 +319,8 @@ payment = await findLtcPayment(deal.deposit_address, min);
 
 if (!payment) continue;
 
-const needed = deal.currency === 'BTC'
+const needed =
+deal.currency === 'BTC'
 ? parseInt(BTC_MIN_CONF)
 : parseInt(LTC_MIN_CONF);
 
